@@ -1,0 +1,4 @@
+# exclude or but Dockerfile
+*
+!Dockerfile
+
