@@ -10,7 +10,8 @@ docker build -t zhjwpku/csapp3e .
 
 ```
 # use absolute path to pass a host directory
-docker run -dit --name csapp3e -v /Users/zhjwpku/fancy/awesome-courses-labs/CSAPP3e/solutions:/opt/csapp3e zhjwpku/csapp3e /bin/bash
+# the --cap-add=SYS_PTRACE option is for running gdb in docker
+docker run --cap-add=SYS_PTRACE -dit --name csapp3e -v /Users/zhjwpku/fancy/awesome-courses-labs/CSAPP3e/solutions:/opt/csapp3e zhjwpku/csapp3e /bin/bash
 # login to the container
 docker exec -it csapp3e /bin/bash
 ```

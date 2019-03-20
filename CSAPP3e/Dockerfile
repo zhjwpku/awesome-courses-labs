@@ -7,4 +7,4 @@ WORKDIR ${csapp3e}
 RUN apt-get update && apt-get install apt-file -y && apt-file update
 
 # install the packages we need to do the labs
-RUN apt-get install -y vim make gcc libc6-dev-i386
+RUN apt-get install -y vim make gcc gdb libc6-dev-i386
