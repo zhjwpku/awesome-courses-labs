@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <map>
+#include <mutex>
 
 #include "hash/hash_table.h"
 
@@ -35,5 +37,17 @@ public:
 
 private:
   // add your own member variables here
+  void print();
+  struct bucket {
+    int local_depth;
+    int bucket_id = -1;
+    std::map<K, V> data;
+
+    bucket(int depth, int id) : local_depth{depth}, bucket_id{id} {}
+  };
+  int global_depth = 0;
+  size_t bucket_size = 0;
+  std::vector<bucket*> buckets;
+  mutable std::mutex mtx;
 };
 } // namespace cmudb
