@@ -15,6 +15,7 @@
 #include "hash/extendible_hash.h"
 #include "logging/log_manager.h"
 #include "page/page.h"
+#include "common/logger.h"
 
 namespace cmudb {
 class BufferPoolManager {
