@@ -24,7 +24,18 @@ BPLUSTREE_TYPE::BPlusTree(const std::string &name,
  * Helper function to decide whether current b+tree is empty
  */
 INDEX_TEMPLATE_ARGUMENTS
-bool BPLUSTREE_TYPE::IsEmpty() const { return true; }
+bool BPLUSTREE_TYPE::IsEmpty() const {
+  if (root_page_id_ == INVALID_PAGE_ID) {
+    return true;
+  }
+
+  auto *page = buffer_pool_manager->FetchPage(root_page_id_);
+  assert(page != nullptr);
+  BPlusTreePage *node = reinterpret_cast<BPlusTreePage*>(page->GetData());
+  bool ret = node->GetSize() == 0;
+  assert(buffer_pool_manager->UnpinPage(root_page_id_, false));
+  return ret;
+}
 /*****************************************************************************
  * SEARCH
  *****************************************************************************/
@@ -37,6 +48,7 @@ INDEX_TEMPLATE_ARGUMENTS
 bool BPLUSTREE_TYPE::GetValue(const KeyType &key,
                               std::vector<ValueType> &result,
                               Transaction *transaction) {
+
   return false;
 }
 
@@ -102,6 +114,20 @@ void BPLUSTREE_TYPE::InsertIntoParent(BPlusTreePage *old_node,
                                       const KeyType &key,
                                       BPlusTreePage *new_node,
                                       Transaction *transaction) {}
+
+
+/*****************************************************************************
+ * Helper functions
+ ****************************************************************************/
+INDEX_TEMPLATE_ARGUMENTS
+BPlusTreePage* BPLUSTREE_TYPE::GetTreePage(page_id_t page_id) {
+  auto page = buffer_pool_manager_->FetchPage(page_id);
+  BPlusTreePage *node = reinterpret_cast<BPlusTreePage *>(page->GetData());
+  if(page == nullptr)
+    throw Exception(EXCEPTION_TYPE_INDEX,
+                    "all page are pinned while printing");
+  return node;
+}
 
 /*****************************************************************************
  * REMOVE
@@ -208,7 +234,18 @@ INDEXITERATOR_TYPE BPLUSTREE_TYPE::Begin(const KeyType &key) {
 INDEX_TEMPLATE_ARGUMENTS
 B_PLUS_TREE_LEAF_PAGE_TYPE *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key,
                                                          bool leftMost) {
-  return nullptr;
+  BPlusTreePage *page = GetTreePage(root_page_id_);
+  page_id_t page_id;
+  while(!(page->IsLeafPage())) {
+    if(leftMost)
+      page_id = static_cast<MY_B_PLUS_TREE_INTERNAL_PAGE_TYPE *>(page)->ValueAt(0);
+    else
+      page_id = static_cast<MY_B_PLUS_TREE_INTERNAL_PAGE_TYPE *>(page)->Lookup(key, comparator_);
+    assert(buffer_pool_manager_->UnpinPage(page->GetPageId(), false));
+    page = GetTreePage(page_id);
+  }
+
+  return static_cast<B_PLUS_TREE_LEAF_PAGE_TYPE *>(page);
 }
 
 /*

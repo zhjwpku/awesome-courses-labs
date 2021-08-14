@@ -72,6 +72,8 @@ private:
                         BPlusTreePage *new_node,
                         Transaction *transaction = nullptr);
 
+  BPlusTreePage* GetTreePage(page_id_t page_id);
+
   template <typename N> N *Split(N *node);
 
   template <typename N>
